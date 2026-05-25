@@ -96,10 +96,15 @@ class VibePrompt(BaseModel):
 def home() -> str:
     return """
     <h1>A/B Test Calculator API</h1>
-    <p>Endpoints: /docs, /sample-size, /mde, /z-test, /welch, /srm, /ai/suggest</p>
+    <p>Endpoints: /docs, /sample-size, /mde, /z-test, /welch, /srm, /ai/suggest, /health</p>
     """
 
 
+
+
+@app.get('/health')
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 @app.post('/ai/suggest')
 def ai_suggest(payload: VibePrompt) -> dict:
     api_key = os.getenv("VIBECODE_API_KEY")
@@ -107,8 +112,9 @@ def ai_suggest(payload: VibePrompt) -> dict:
         raise HTTPException(status_code=500, detail="VIBECODE_API_KEY is not set")
 
     url = os.getenv("VIBECODE_ROUTER_URL", "https://vibecode.bitrix24.tech/v1/chat/completions")
+    model = os.getenv("VIBECODE_MODEL", "bitrix/bitrixgpt-5.5")
     body = {
-        "model": "bitrix/bitrixgpt-5.5",
+        "model": model,
         "messages": [
             {"role": "system", "content": "Ты ассистент по A/B тестам."},
             {"role": "user", "content": payload.prompt},
